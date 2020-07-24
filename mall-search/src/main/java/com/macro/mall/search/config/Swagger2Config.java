@@ -31,7 +31,7 @@ public class Swagger2Config {
         return new ApiInfoBuilder()
                 .title("mall搜索系统")
                 .description("mall搜索模块")
-                .contact("macro")
+                //.contact("macro")
                 .version("1.0")
                 .build();
     }

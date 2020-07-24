@@ -1,0 +1,16 @@
+
+使用ps -aux|grep redis命令可以看到服务器系统进程默认端口6379
+通过"pgrep mongo -l "查看进程是否已经启动
+
+
+redis-server /etc/redis6/redis.conf //启动redis
+redis-cli -p 6379
+
+　然后执行命令ping，若输出为pong，则证明服务成功启动。
+
+　执行quit命令退出，现在可以通过下面的命令查看到该进程：
+
+    ps -ef|grep redis
+
+ubuntu中chkconfig已经被sysv-rc-conf替代，具体如下操作如下
+sysv-rc-conf keepalived on //开机启动
