@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mytool.mall.mapper.FarmItemMapper">
+  <resultMap id="BaseResultMap" type="com.mytool.mall.model.FarmItem">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="farm_name" jdbcType="VARCHAR" property="farmName" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="image" jdbcType="VARCHAR" property="image" />
+    <result column="image_title" jdbcType="VARCHAR" property="imageTitle" />
+    <result column="image2" jdbcType="VARCHAR" property="image2" />
+    <result column="image2_title" jdbcType="VARCHAR" property="image2Title" />
+    <result column="image3" jdbcType="VARCHAR" property="image3" />
+    <result column="image3_title" jdbcType="VARCHAR" property="image3Title" />
+    <result column="image4" jdbcType="VARCHAR" property="image4" />
+    <result column="image4_title" jdbcType="VARCHAR" property="image4Title" />
+    <result column="image5" jdbcType="VARCHAR" property="image5" />
+    <result column="image5_title" jdbcType="VARCHAR" property="image5Title" />
+    <result column="video" jdbcType="VARCHAR" property="video" />
+    <result column="video_title" jdbcType="VARCHAR" property="videoTitle" />
+    <result column="video2" jdbcType="VARCHAR" property="video2" />
+    <result column="video2_title" jdbcType="VARCHAR" property="video2Title" />
+    <result column="video3" jdbcType="VARCHAR" property="video3" />
+    <result column="video3_title" jdbcType="VARCHAR" property="video3Title" />
+    <result column="video4" jdbcType="VARCHAR" property="video4" />
+    <result column="video4_title" jdbcType="VARCHAR" property="video4Title" />
+    <result column="video5" jdbcType="VARCHAR" property="video5" />
+    <result column="video5_title" jdbcType="VARCHAR" property="video5Title" />
+    <result column="province" jdbcType="VARCHAR" property="province" />
+    <result column="city" jdbcType="VARCHAR" property="city" />
+    <result column="area" jdbcType="VARCHAR" property="area" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, farm_name, name, address, image, image_title, image2, image2_title, image3, image3_title, 
+    image4, image4_title, image5, image5_title, video, video_title, video2, video2_title, 
+    video3, video3_title, video4, video4_title, video5, video5_title, province, city, 
+    area
+  </sql>
+  <select id="selectByExample" parameterType="com.mytool.mall.model.FarmItemExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from farm_item
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from farm_item
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from farm_item
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.mytool.mall.model.FarmItemExample">
+    delete from farm_item
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.mytool.mall.model.FarmItem">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into farm_item (farm_name, name, address, 
+      image, image_title, image2, 
+      image2_title, image3, image3_title, 
+      image4, image4_title, image5, 
+      image5_title, video, video_title, 
+      video2, video2_title, video3, 
+      video3_title, video4, video4_title, 
+      video5, video5_title, province, 
+      city, area)
+    values (#{farmName,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, 
+      #{image,jdbcType=VARCHAR}, #{imageTitle,jdbcType=VARCHAR}, #{image2,jdbcType=VARCHAR}, 
+      #{image2Title,jdbcType=VARCHAR}, #{image3,jdbcType=VARCHAR}, #{image3Title,jdbcType=VARCHAR}, 
+      #{image4,jdbcType=VARCHAR}, #{image4Title,jdbcType=VARCHAR}, #{image5,jdbcType=VARCHAR}, 
+      #{image5Title,jdbcType=VARCHAR}, #{video,jdbcType=VARCHAR}, #{videoTitle,jdbcType=VARCHAR}, 
+      #{video2,jdbcType=VARCHAR}, #{video2Title,jdbcType=VARCHAR}, #{video3,jdbcType=VARCHAR}, 
+      #{video3Title,jdbcType=VARCHAR}, #{video4,jdbcType=VARCHAR}, #{video4Title,jdbcType=VARCHAR}, 
+      #{video5,jdbcType=VARCHAR}, #{video5Title,jdbcType=VARCHAR}, #{province,jdbcType=VARCHAR}, 
+      #{city,jdbcType=VARCHAR}, #{area,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mytool.mall.model.FarmItem">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into farm_item
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="farmName != null">
+        farm_name,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="address != null">
+        address,
+      </if>
+      <if test="image != null">
+        image,
+      </if>
+      <if test="imageTitle != null">
+        image_title,
+      </if>
+      <if test="image2 != null">
+        image2,
+      </if>
+      <if test="image2Title != null">
+        image2_title,
+      </if>
+      <if test="image3 != null">
+        image3,
+      </if>
+      <if test="image3Title != null">
+        image3_title,
+      </if>
+      <if test="image4 != null">
+        image4,
+      </if>
+      <if test="image4Title != null">
+        image4_title,
+      </if>
+      <if test="image5 != null">
+        image5,
+      </if>
+      <if test="image5Title != null">
+        image5_title,
+      </if>
+      <if test="video != null">
+        video,
+      </if>
+      <if test="videoTitle != null">
+        video_title,
+      </if>
+      <if test="video2 != null">
+        video2,
+      </if>
+      <if test="video2Title != null">
+        video2_title,
+      </if>
+      <if test="video3 != null">
+        video3,
+      </if>
+      <if test="video3Title != null">
+        video3_title,
+      </if>
+      <if test="video4 != null">
+        video4,
+      </if>
+      <if test="video4Title != null">
+        video4_title,
+      </if>
+      <if test="video5 != null">
+        video5,
+      </if>
+      <if test="video5Title != null">
+        video5_title,
+      </if>
+      <if test="province != null">
+        province,
+      </if>
+      <if test="city != null">
+        city,
+      </if>
+      <if test="area != null">
+        area,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="farmName != null">
+        #{farmName,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null">
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="image != null">
+        #{image,jdbcType=VARCHAR},
+      </if>
+      <if test="imageTitle != null">
+        #{imageTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="image2 != null">
+        #{image2,jdbcType=VARCHAR},
+      </if>
+      <if test="image2Title != null">
+        #{image2Title,jdbcType=VARCHAR},
+      </if>
+      <if test="image3 != null">
+        #{image3,jdbcType=VARCHAR},
+      </if>
+      <if test="image3Title != null">
+        #{image3Title,jdbcType=VARCHAR},
+      </if>
+      <if test="image4 != null">
+        #{image4,jdbcType=VARCHAR},
+      </if>
+      <if test="image4Title != null">
+        #{image4Title,jdbcType=VARCHAR},
+      </if>
+      <if test="image5 != null">
+        #{image5,jdbcType=VARCHAR},
+      </if>
+      <if test="image5Title != null">
+        #{image5Title,jdbcType=VARCHAR},
+      </if>
+      <if test="video != null">
+        #{video,jdbcType=VARCHAR},
+      </if>
+      <if test="videoTitle != null">
+        #{videoTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="video2 != null">
+        #{video2,jdbcType=VARCHAR},
+      </if>
+      <if test="video2Title != null">
+        #{video2Title,jdbcType=VARCHAR},
+      </if>
+      <if test="video3 != null">
+        #{video3,jdbcType=VARCHAR},
+      </if>
+      <if test="video3Title != null">
+        #{video3Title,jdbcType=VARCHAR},
+      </if>
+      <if test="video4 != null">
+        #{video4,jdbcType=VARCHAR},
+      </if>
+      <if test="video4Title != null">
+        #{video4Title,jdbcType=VARCHAR},
+      </if>
+      <if test="video5 != null">
+        #{video5,jdbcType=VARCHAR},
+      </if>
+      <if test="video5Title != null">
+        #{video5Title,jdbcType=VARCHAR},
+      </if>
+      <if test="province != null">
+        #{province,jdbcType=VARCHAR},
+      </if>
+      <if test="city != null">
+        #{city,jdbcType=VARCHAR},
+      </if>
+      <if test="area != null">
+        #{area,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.mytool.mall.model.FarmItemExample" resultType="java.lang.Long">
+    select count(*) from farm_item
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update farm_item
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.farmName != null">
+        farm_name = #{record.farmName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.name != null">
+        name = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.address != null">
+        address = #{record.address,jdbcType=VARCHAR},
+      </if>
+      <if test="record.image != null">
+        image = #{record.image,jdbcType=VARCHAR},
+      </if>
+      <if test="record.imageTitle != null">
+        image_title = #{record.imageTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="record.image2 != null">
+        image2 = #{record.image2,jdbcType=VARCHAR},
+      </if>
+      <if test="record.image2Title != null">
+        image2_title = #{record.image2Title,jdbcType=VARCHAR},
+      </if>
+      <if test="record.image3 != null">
+        image3 = #{record.image3,jdbcType=VARCHAR},
+      </if>
+      <if test="record.image3Title != null">
+        image3_title = #{record.image3Title,jdbcType=VARCHAR},
+      </if>
+      <if test="record.image4 != null">
+        image4 = #{record.image4,jdbcType=VARCHAR},
+      </if>
+      <if test="record.image4Title != null">
+        image4_title = #{record.image4Title,jdbcType=VARCHAR},
+      </if>
+      <if test="record.image5 != null">
+        image5 = #{record.image5,jdbcType=VARCHAR},
+      </if>
+      <if test="record.image5Title != null">
+        image5_title = #{record.image5Title,jdbcType=VARCHAR},
+      </if>
+      <if test="record.video != null">
+        video = #{record.video,jdbcType=VARCHAR},
+      </if>
+      <if test="record.videoTitle != null">
+        video_title = #{record.videoTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="record.video2 != null">
+        video2 = #{record.video2,jdbcType=VARCHAR},
+      </if>
+      <if test="record.video2Title != null">
+        video2_title = #{record.video2Title,jdbcType=VARCHAR},
+      </if>
+      <if test="record.video3 != null">
+        video3 = #{record.video3,jdbcType=VARCHAR},
+      </if>
+      <if test="record.video3Title != null">
+        video3_title = #{record.video3Title,jdbcType=VARCHAR},
+      </if>
+      <if test="record.video4 != null">
+        video4 = #{record.video4,jdbcType=VARCHAR},
+      </if>
+      <if test="record.video4Title != null">
+        video4_title = #{record.video4Title,jdbcType=VARCHAR},
+      </if>
+      <if test="record.video5 != null">
+        video5 = #{record.video5,jdbcType=VARCHAR},
+      </if>
+      <if test="record.video5Title != null">
+        video5_title = #{record.video5Title,jdbcType=VARCHAR},
+      </if>
+      <if test="record.province != null">
+        province = #{record.province,jdbcType=VARCHAR},
+      </if>
+      <if test="record.city != null">
+        city = #{record.city,jdbcType=VARCHAR},
+      </if>
+      <if test="record.area != null">
+        area = #{record.area,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update farm_item
+    set id = #{record.id,jdbcType=INTEGER},
+      farm_name = #{record.farmName,jdbcType=VARCHAR},
+      name = #{record.name,jdbcType=VARCHAR},
+      address = #{record.address,jdbcType=VARCHAR},
+      image = #{record.image,jdbcType=VARCHAR},
+      image_title = #{record.imageTitle,jdbcType=VARCHAR},
+      image2 = #{record.image2,jdbcType=VARCHAR},
+      image2_title = #{record.image2Title,jdbcType=VARCHAR},
+      image3 = #{record.image3,jdbcType=VARCHAR},
+      image3_title = #{record.image3Title,jdbcType=VARCHAR},
+      image4 = #{record.image4,jdbcType=VARCHAR},
+      image4_title = #{record.image4Title,jdbcType=VARCHAR},
+      image5 = #{record.image5,jdbcType=VARCHAR},
+      image5_title = #{record.image5Title,jdbcType=VARCHAR},
+      video = #{record.video,jdbcType=VARCHAR},
+      video_title = #{record.videoTitle,jdbcType=VARCHAR},
+      video2 = #{record.video2,jdbcType=VARCHAR},
+      video2_title = #{record.video2Title,jdbcType=VARCHAR},
+      video3 = #{record.video3,jdbcType=VARCHAR},
+      video3_title = #{record.video3Title,jdbcType=VARCHAR},
+      video4 = #{record.video4,jdbcType=VARCHAR},
+      video4_title = #{record.video4Title,jdbcType=VARCHAR},
+      video5 = #{record.video5,jdbcType=VARCHAR},
+      video5_title = #{record.video5Title,jdbcType=VARCHAR},
+      province = #{record.province,jdbcType=VARCHAR},
+      city = #{record.city,jdbcType=VARCHAR},
+      area = #{record.area,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mytool.mall.model.FarmItem">
+    update farm_item
+    <set>
+      <if test="farmName != null">
+        farm_name = #{farmName,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null">
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="image != null">
+        image = #{image,jdbcType=VARCHAR},
+      </if>
+      <if test="imageTitle != null">
+        image_title = #{imageTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="image2 != null">
+        image2 = #{image2,jdbcType=VARCHAR},
+      </if>
+      <if test="image2Title != null">
+        image2_title = #{image2Title,jdbcType=VARCHAR},
+      </if>
+      <if test="image3 != null">
+        image3 = #{image3,jdbcType=VARCHAR},
+      </if>
+      <if test="image3Title != null">
+        image3_title = #{image3Title,jdbcType=VARCHAR},
+      </if>
+      <if test="image4 != null">
+        image4 = #{image4,jdbcType=VARCHAR},
+      </if>
+      <if test="image4Title != null">
+        image4_title = #{image4Title,jdbcType=VARCHAR},
+      </if>
+      <if test="image5 != null">
+        image5 = #{image5,jdbcType=VARCHAR},
+      </if>
+      <if test="image5Title != null">
+        image5_title = #{image5Title,jdbcType=VARCHAR},
+      </if>
+      <if test="video != null">
+        video = #{video,jdbcType=VARCHAR},
+      </if>
+      <if test="videoTitle != null">
+        video_title = #{videoTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="video2 != null">
+        video2 = #{video2,jdbcType=VARCHAR},
+      </if>
+      <if test="video2Title != null">
+        video2_title = #{video2Title,jdbcType=VARCHAR},
+      </if>
+      <if test="video3 != null">
+        video3 = #{video3,jdbcType=VARCHAR},
+      </if>
+      <if test="video3Title != null">
+        video3_title = #{video3Title,jdbcType=VARCHAR},
+      </if>
+      <if test="video4 != null">
+        video4 = #{video4,jdbcType=VARCHAR},
+      </if>
+      <if test="video4Title != null">
+        video4_title = #{video4Title,jdbcType=VARCHAR},
+      </if>
+      <if test="video5 != null">
+        video5 = #{video5,jdbcType=VARCHAR},
+      </if>
+      <if test="video5Title != null">
+        video5_title = #{video5Title,jdbcType=VARCHAR},
+      </if>
+      <if test="province != null">
+        province = #{province,jdbcType=VARCHAR},
+      </if>
+      <if test="city != null">
+        city = #{city,jdbcType=VARCHAR},
+      </if>
+      <if test="area != null">
+        area = #{area,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mytool.mall.model.FarmItem">
+    update farm_item
+    set farm_name = #{farmName,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      address = #{address,jdbcType=VARCHAR},
+      image = #{image,jdbcType=VARCHAR},
+      image_title = #{imageTitle,jdbcType=VARCHAR},
+      image2 = #{image2,jdbcType=VARCHAR},
+      image2_title = #{image2Title,jdbcType=VARCHAR},
+      image3 = #{image3,jdbcType=VARCHAR},
+      image3_title = #{image3Title,jdbcType=VARCHAR},
+      image4 = #{image4,jdbcType=VARCHAR},
+      image4_title = #{image4Title,jdbcType=VARCHAR},
+      image5 = #{image5,jdbcType=VARCHAR},
+      image5_title = #{image5Title,jdbcType=VARCHAR},
+      video = #{video,jdbcType=VARCHAR},
+      video_title = #{videoTitle,jdbcType=VARCHAR},
+      video2 = #{video2,jdbcType=VARCHAR},
+      video2_title = #{video2Title,jdbcType=VARCHAR},
+      video3 = #{video3,jdbcType=VARCHAR},
+      video3_title = #{video3Title,jdbcType=VARCHAR},
+      video4 = #{video4,jdbcType=VARCHAR},
+      video4_title = #{video4Title,jdbcType=VARCHAR},
+      video5 = #{video5,jdbcType=VARCHAR},
+      video5_title = #{video5Title,jdbcType=VARCHAR},
+      province = #{province,jdbcType=VARCHAR},
+      city = #{city,jdbcType=VARCHAR},
+      area = #{area,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

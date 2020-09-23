@@ -26,3 +26,4 @@ Screen -S screenID -X quit 结束任务
 
 java -jar xxx.jar 运行jar
 
+自动生成代码 run Generator

@@ -41,6 +41,6 @@ spring:
 logging:
   level:
     org.springframework.data.mongodb.core: debug
-    com.macro.mall.mapper: debug
-    com.macro.mall.portal.dao: debug
+    com.mytool.mall.mapper: debug
+    com.mytool.mall.portal.dao: debug
 
