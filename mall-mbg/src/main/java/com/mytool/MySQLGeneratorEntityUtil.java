@@ -36,8 +36,6 @@ public class MySQLGeneratorEntityUtil {
     private boolean needSql = false;
     //是否需要导入包java.math.BigDecimal
     private boolean needBigDecimal = false;
-    //是否创建EntityHelper
-    private boolean needEntityHelper = true;
     private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final String SQL = "SELECT * FROM ";// 数据库操作
 
@@ -47,23 +45,24 @@ public class MySQLGeneratorEntityUtil {
     private static final String PASS = "xaoyuan521";
     private static final String DRIVER = "com.mysql.cj.jdbc.Driver";
 
-
-            //"com.mysql.jdbc.Driver";
+    private static String moduleName = "farm";
 
     //指定实体生成所在包的路径
-    private static String basePath = new File("").getAbsolutePath()+"/farm/src/main/java/";
+    private static String basePath = new File("").getAbsolutePath()+"/"+moduleName+"/src/main/java/";
 
-    private static String  packageName="com.mytool.farm";
+    private static String resourcesPath = new File("").getAbsolutePath()+"/"+moduleName+"/src/main/resources/";
 
+
+    private static String  packageName="com.mytool."+moduleName;
 
     //指定包名
     private static String packageModelOutPath = packageName+".model";
 
-    
     //指定包名
     private static String packageControllerOutPath =  packageName+".controller";
 
     private static String packageMapperOutPath = packageName+".mapper";
+
 
     private static String packageServiceOutPath =  packageName+".service";
     private static String packageServiceimpleOutPath = packageName+".service.impl";
@@ -72,6 +71,9 @@ public class MySQLGeneratorEntityUtil {
     private String authorName = "mytool";
     //指定需要生成的表的表名，全部生成设置为null
     private String[] generateTables = new String[]{"farm_item"};
+
+    private String primaryKey = "id";
+
 
 
 
@@ -116,6 +118,18 @@ public class MySQLGeneratorEntityUtil {
         if (!dir.exists()) {dir.mkdirs();System.out.println("mkdirs dir 【" + dirName + "】");}
         return dirName;
     }
+    /**
+     * 功能：获取并创建实体所在的路径目录
+     * @return
+     */
+    private static String pkgXmlDirName() {
+        String dirName = resourcesPath + "mapper";
+        File dir = new File(dirName);
+
+        if (!dir.exists()) {dir.mkdirs();System.out.println("mkdirs dir 【" + dirName + "】");}
+        return dirName;
+    }
+
     /**
      * 功能：获取并创建实体所在的路径目录
      * @return
@@ -174,15 +188,45 @@ public class MySQLGeneratorEntityUtil {
         // 实体部分
         sb.append("public class " + modelName  + " implements Serializable {\r\n\r\n");
 
-        processAllAttrs(sb);// 属性
+        for (int i = 0; i < colNames.length; i++) {
+            if(colNamesComment.get(colNames[i])!=null &&!"".equals(colNamesComment.get(colNames[i]))) {
+                sb.append("\t@ApiModelProperty(value = \""+colNamesComment.get(colNames[i])+"\")\r\n");
+            }
+            sb.append("\tprivate " + sqlType2JavaType(colTypes[i]) + " " + colNames[i] + ";\r\n");
+        }
+        sb.append("\tprivate static final long serialVersionUID = 1L;\r\n");
+
+
+
         sb.append("\r\n");
-        processConstructor(sb);//构造函数
-        processAllMethod(sb);// get set方法
-        processToString(sb);
+
+
+        for (int i = 0; i < colNames.length; i++) {
+            sb.append("\tpublic void set" + initCap(colNames[i]) + "(" + sqlType2JavaType(colTypes[i]) + " "
+                    + colNames[i] + "){\r\n");
+            sb.append("\t\tthis." + colNames[i] + "=" + colNames[i] + ";\r\n");
+            sb.append("\t}\r\n");
+            sb.append("\tpublic " + sqlType2JavaType(colTypes[i]) + " get" + initCap(colNames[i]) + "(){\r\n");
+            sb.append("\t\treturn " + colNames[i] + ";\r\n");
+            sb.append("\t}\r\n");
+        }
+
+        sb.append("\t@Override\r\n\tpublic String toString() {\r\n");
+        sb.append("\t\tStringBuilder sb = new StringBuilder();\r\n");
+        sb.append("\t\tsb.append(getClass().getSimpleName());\r\n");
+        sb.append("\t\tsb.append(\" [\");\r\n");
+        sb.append("\t\tsb.append(\"Hash = \").append(hashCode());\r\n");
+        for (int i = 0; i < colNames.length; i++) {
+            sb.append("\t\tsb.append(\", "+colNames[i]+"=\").append("+colNames[i]+");\r\n");
+        }
+        sb.append("\t\tsb.append(\", serialVersionUID=\").append(serialVersionUID);\r\n");
+        sb.append("\t\tsb.append(\"]\");\r\n");
+        sb.append("\t\treturn sb.toString();\r\n");
+
+        sb.append("\t}\r\n");
         sb.append("}\r\n");
         return sb.toString();
     }
-
 
     /**
      * @description 生成class的所有内容
@@ -214,12 +258,6 @@ public class MySQLGeneratorEntityUtil {
         sb.append(" * create time: " + SDF.format(new Date()) + "\r\n");
         sb.append(" */\r\n");
         // 实体部分
-        String classExtends ="";
-        if(needEntityHelper) {
-            classExtends=" ";
-        }
-
-
         sb.append("@Controller\r\n");
         sb.append("@Api(value = \""+modelName+"Controller\", description = \""+modelName+"Controller\")\r\n");
         sb.append("@RequestMapping(\"/"+modelName+"\")\r\n");
@@ -229,15 +267,6 @@ public class MySQLGeneratorEntityUtil {
         sb.append("    @Autowired\r\n");
         sb.append("    "+modelName +"Service service;\r\n\r\n");
 
-        processControllerMethed(sb);
-        sb.append("}\r\n");
-        return sb.toString();
-    }
-    /**
-     * @param sb
-     * @description 生成所有get/set方法
-     */
-    private void processControllerMethed(StringBuffer sb) {
 
         sb.append("    @ApiOperation(\"create one item\")\n");
         sb.append("    @RequestMapping(value = \"/create\",method = RequestMethod.POST)\r\n");
@@ -251,10 +280,10 @@ public class MySQLGeneratorEntityUtil {
         sb.append("    }\n\n");
 
         sb.append("    @ApiOperation(\"update item info\")\n");
-        sb.append("    @RequestMapping(value = \"/update/{id}\",method = RequestMethod.POST)\r\n");
-        sb.append("    public CommonResult update(@PathVariable Long id,\r\n");
+        sb.append("    @RequestMapping(value = \"/update/{"+primaryKey+"}\",method = RequestMethod.POST)\r\n");
+        sb.append("    public CommonResult update(@PathVariable Integer "+primaryKey+",\r\n");
         sb.append("                               @RequestBody "+modelName+" "+modelName2+") {\n");
-        sb.append("        int count = service.update(id,"+modelName2+");\n");
+        sb.append("        int count = service.update("+primaryKey+","+modelName2+");\n");
         sb.append("        if (count > 0) {\n");
         sb.append("             return CommonResult.success(count);\n");
         sb.append("        } else {\n");
@@ -263,10 +292,10 @@ public class MySQLGeneratorEntityUtil {
         sb.append("    }\n\n");
 
 
-        sb.append("    @ApiOperation(\"delete item by id\")\n");
-        sb.append("    @RequestMapping(value = \"/delete/{id}\",method = RequestMethod.POST)\r\n");
-        sb.append("    public CommonResult delete(@PathVariable Long id) {\r\n");
-        sb.append("        int count = service.delete(id);\n");
+        sb.append("    @ApiOperation(\"delete item by "+primaryKey+"\")\n");
+        sb.append("    @RequestMapping(value = \"/delete/{"+primaryKey+"}\",method = RequestMethod.POST)\r\n");
+        sb.append("    public CommonResult delete(@PathVariable Integer "+primaryKey+") {\r\n");
+        sb.append("        int count = service.delete("+primaryKey+");\n");
         sb.append("        if (count > 0) {\n");
         sb.append("             return CommonResult.success(count);\n");
         sb.append("        } else {\n");
@@ -276,9 +305,9 @@ public class MySQLGeneratorEntityUtil {
 
 
         sb.append("    @ApiOperation(\"get detail\")\n");
-        sb.append("    @RequestMapping(value = \"/{id}\",method = RequestMethod.GET)\r\n");
-        sb.append("    public CommonResult<"+modelName+"> getItem(@PathVariable Long id){\r\n");
-        sb.append("         "+modelName+" "+modelName2+"=service.getItem(id);\n");
+        sb.append("    @RequestMapping(value = \"/{"+primaryKey+"}\",method = RequestMethod.GET)\r\n");
+        sb.append("    public CommonResult<"+modelName+"> getItem(@PathVariable Integer "+primaryKey+"){\r\n");
+        sb.append("         "+modelName+" "+modelName2+"=service.getItem("+primaryKey+");\n");
         sb.append("         return CommonResult.success("+modelName2+");\n");
         sb.append("    }\n\n");
 
@@ -290,9 +319,9 @@ public class MySQLGeneratorEntityUtil {
         sb.append("         List<"+modelName+"> itemList = service.list(pageSize, pageNum);\n");
         sb.append("         return CommonResult.success(CommonPage.restPage(itemList));\n");
         sb.append("    }\n\n");
-
+        sb.append("}\r\n");
+        return sb.toString();
     }
-
 
     /**
      * @description 生成class的所有内容
@@ -300,11 +329,7 @@ public class MySQLGeneratorEntityUtil {
     private String makeMapper() {
         StringBuffer sb = new StringBuffer();
         sb.append("package " + packageMapperOutPath + ";\r\n");
-        sb.append("import org.apache.ibatis.annotations.Insert;  \r\n");
-        sb.append("import org.apache.ibatis.annotations.Update;  \r\n");
-        sb.append("import org.springframework.stereotype.Component;  \r\n");
-        sb.append("import com.mytool.farm.entity."+modelName+" ; \r\n");
-        sb.append("import org.apache.ibatis.annotations.Select;\r\n");
+        sb.append("import com.mytool.farm.model."+modelName+" ; \r\n");
         sb.append("import java.util.List;\r\n");
         sb.append("\r\n");
 
@@ -316,16 +341,88 @@ public class MySQLGeneratorEntityUtil {
         sb.append(" */ \r\n");
         // 实体部分
 
-        sb.append("@Component\n");
-
         sb.append("public interface " + modelName + "Mapper" + "{\r\n\r\n");
 
-        sb.append("\r\n");
+        sb.append("\tint insert("+modelName +" model);\r\n\r\n");
 
-        sb.append("int insert"+modelName +"("+modelName +" model);\r\n\r\n");
+        sb.append("\tint update("+modelName +" model);\r\n\r\n");
+
+        sb.append("\tint delete(Integer "+primaryKey+");\r\n\r\n");
+
+        sb.append("\t"+modelName+" getItem(Integer "+primaryKey+");\r\n\r\n");
+
+        sb.append("\tList<"+modelName+"> list(Integer pageNum,Integer pageSize);\r\n\r\n");
+
         sb.append("}\r\n");
         return sb.toString();
     }
+
+
+    /**
+     * @description 生成class的所有内容
+     */
+    private String makeXml() {
+        StringBuffer sb = new StringBuffer();
+
+        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n");
+        sb.append("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\r\n");
+        sb.append("<mapper namespace=\""+packageMapperOutPath+"."+modelName+"Mapper\">\r\n");
+        sb.append("<resultMap id=\"BaseResultMap\" type=\""+packageModelOutPath+"."+modelName+"\">\r\n");
+
+
+        String jdbcType="";
+        String colNames_str="";
+        String colNames_str_value="";
+
+
+        for (int i = 0; i < colNames.length; i++) {
+
+            jdbcType=sqlType2JdbcType(colTypes[i]);
+
+            sb.append("\t<result column=\""+colNames[i]+"\" jdbcType=\""+jdbcType+"\" property=\""+under2camel(colNames[i], false)+"\" />\r\n");
+            if(i>0){
+                colNames_str+=",";
+                colNames_str_value+=",";
+            }
+            colNames_str+=colNames[i];
+            colNames_str_value+="#{"+colNames[i]+",jdbcType="+jdbcType+"}";
+        }
+
+        sb.append("</resultMap>\r\n");
+
+        sb.append("<insert id=\"insert\" parameterType=\""+packageModelOutPath+"."+modelName+"\">\r\n");
+        sb.append("\t<selectKey keyProperty=\"id\" order=\"AFTER\" resultType=\"java.lang.Integer\">\r\n");
+        sb.append("\tSELECT LAST_INSERT_ID()\r\n");
+        sb.append("\t</selectKey>\r\n");
+        sb.append("\tinsert into "+tableName+" ("+colNames_str+")\r\n");
+        sb.append("\tvalues("+colNames_str_value+")\n");
+        sb.append("</insert>\n\n");
+
+
+        sb.append("<delete id=\"delete\" parameterType=\"java.lang.Integer\">\n");
+        sb.append("\t\tdelete from "+tableName+"\n");
+        sb.append("\t\twhere "+primaryKey+" = #{"+primaryKey+",jdbcType=INTEGER}\n");
+        sb.append("</delete>\n");
+
+        sb.append("<select id=\"getItem\" parameterType=\"java.lang.Integer\" resultMap=\"BaseResultMap\">\n");
+        sb.append("\t\tselect *\n");
+        sb.append("\t\tfrom client_menu\n");
+        sb.append("\t\twhere "+primaryKey+" = #{"+primaryKey+",jdbcType=INTEGER}\n");
+        sb.append("</select>\n");
+
+
+        sb.append("<select id=\"list\" parameterType=\"java.lang.Integer\" resultMap=\"BaseResultMap\">\n");
+        sb.append("\t\tselect *\n");
+        sb.append("\t\tfrom client_menu\n");
+        sb.append("\t\twhere "+primaryKey+" = #{"+primaryKey+",jdbcType=INTEGER}\n");
+        sb.append("</select>\n");
+
+
+        sb.append("</mapper>\r\n");
+
+        return sb.toString();
+    }
+
 
     /**
      * @description 生成class的所有内容
@@ -333,7 +430,7 @@ public class MySQLGeneratorEntityUtil {
     private String makeService() {
         StringBuffer sb = new StringBuffer();
         sb.append("package " + packageServiceOutPath + ";\r\n\n");
-        sb.append("import com.mytool.model."+modelName+" ; \r\n");
+        sb.append("import "+packageName+".model."+modelName+" ; \r\n");
         sb.append("import java.util.List;\r\n");
         sb.append("/**\r\n");
         sb.append(" * table name:  " + tableName + "\r\n");
@@ -341,7 +438,22 @@ public class MySQLGeneratorEntityUtil {
         sb.append(" * create time: " + SDF.format(new Date()) + "\r\n");
         sb.append(" */ \r\n");
         sb.append("public interface " + modelName + "Service" + "{\r\n\r\n");
-        processServiceMethed(sb);
+
+        sb.append("     int create("+modelName +" "+modelName2 +");\r\n\r\n");
+
+        sb.append("     int update("+modelName +" "+modelName2 +");\n\n");
+
+        sb.append("     int delete(Integer "+primaryKey+");\n\n");
+
+        sb.append("     "+modelName+" getItem(Integer "+primaryKey+");\n\n");
+
+        sb.append("     /*page search list*/\n\n");
+
+        sb.append("     List<"+modelName+"> list(Integer pageSize, Integer pageNum);\n\n");
+
+
+
+
         sb.append("}\r\n");
         return sb.toString();
     }
@@ -359,6 +471,10 @@ public class MySQLGeneratorEntityUtil {
         sb.append("import "+packageName+".mapper."+modelName+"Mapper ; \r\n");
         sb.append("import org.springframework.stereotype.Service;\r\n");
         sb.append("import java.util.List;\r\n");
+        sb.append("import java.util.Date;\r\n");
+
+
+
         sb.append("import org.springframework.stereotype.Service;\r\n");
         // 注释部分
         sb.append("/**\r\n");
@@ -368,131 +484,41 @@ public class MySQLGeneratorEntityUtil {
         sb.append(" */ \r\n");
         sb.append("@Service\r\n");
         sb.append("public class " + modelName + "ServiceImpl  implements " +modelName+  "Service{\r\n\r\n");
-        processServiceImplMethed(sb);
+
+        sb.append("\t@Autowired\r\n");
+        sb.append("\t"+modelName +"Mapper "+modelName2+"Mapper ;\r\n\r\n");
+
+        sb.append("\t@Autowired\r\n");
+        sb.append("\tpublic int create("+modelName+" "+modelName2+") {\r\n");
+        sb.append("\t\t"+modelName2+".setCreate_time((int)new Date().getTime()/1000);\r\n");
+        sb.append("\t\treturn "+modelName2+"Mapper.insert("+modelName2+");\r\n");
+        sb.append("\t}\r\n\n");
+
+        sb.append("\t@Autowired\r\n");
+        sb.append("\tpublic int update("+modelName+" "+modelName2+") {\r\n");
+        sb.append("\t\t"+modelName2+".setUpdate_time((int)new Date().getTime()/1000);\r\n");
+        sb.append("\t\treturn "+modelName2+"Mapper.update("+modelName2+");\r\n");
+        sb.append("\t}\r\n\n");
+
+        sb.append("\t@Autowired\r\n");
+        sb.append("\tpublic int delete(Integer "+primaryKey+") {\r\n");
+        sb.append("\t\treturn "+modelName2+"Mapper.delete("+primaryKey+");\r\n");
+        sb.append("\t}\r\n\n");
+
+        sb.append("\t@Autowired\r\n");
+        sb.append("\tpublic "+modelName+" getItem(Integer "+primaryKey+") {\r\n");
+        sb.append("\t\treturn "+modelName2+"Mapper.getItem("+primaryKey+");\r\n");
+        sb.append("\t}\r\n\n");
+
+
+        sb.append("\t@Autowired\r\n");
+        sb.append("\tpublic List<"+modelName+"> list(Integer pageNum,Integer pageSize) {\r\n");
+        sb.append("\t\treturn "+modelName2+"Mapper.list(pageNum,pageSize);\r\n");
+        sb.append("\t}\r\n\n");
+
+
         sb.append("}\r\n");
         return sb.toString();
-    }
-
-    /**
-     * @param sb
-     * @description 生成所有成员变量及注释
-     * @author paul
-     * @version V1.0
-     */
-    private void processAllAttrs(StringBuffer sb) {
-        for (int i = 0; i < colNames.length; i++) {
-            if(colNamesComment.get(colNames[i])!=null &&!"".equals(colNamesComment.get(colNames[i]))) {
-                sb.append("\t@ApiModelProperty(value = \""+colNamesComment.get(colNames[i])+"\")\r\n");
-            }
-            sb.append("\tprivate " + sqlType2JavaType(colTypes[i]) + " " + colNames[i] + ";\r\n");
-        }
-        sb.append("\tprivate static final long serialVersionUID = 1L;\r\n");
-    }
-
-    /**
-     * 重写toString()方法
-     * @param sb
-     */
-    private void processToString(StringBuffer sb) {
-        sb.append("\t@Override\r\n\tpublic String toString() {\r\n");
-
-        sb.append("\t\tStringBuilder sb = new StringBuilder();\r\n");
-        sb.append("\t\tsb.append(getClass().getSimpleName());\r\n");
-        sb.append("\t\tsb.append(\" [\");\r\n");
-        sb.append("\t\tsb.append(\"Hash = \").append(hashCode());\r\n");
-        for (int i = 0; i < colNames.length; i++) {
-            sb.append("\t\tsb.append(\", "+colNames[i]+"=\").append("+colNames[i]+");\r\n");
-        }
-        sb.append("\t\tsb.append(\", serialVersionUID=\").append(serialVersionUID);\r\n");
-        sb.append("\t\tsb.append(\"]\");\r\n");
-        sb.append("\t\treturn sb.toString();\r\n");
-
-        sb.append("\t}\r\n");
-    }
-    /**
-     * 构造函数
-     * @param sb
-     */
-    private void processConstructor(StringBuffer sb) {
-        StringBuffer p = new StringBuffer();
-        StringBuffer v = new StringBuffer();
-        for(int i = 0; i < colNames.length; i++) {
-            p.append(sqlType2JavaType(colTypes[i])+" "+colNames[i]);
-            if(i!=colNames.length-1) {
-                p.append(",");
-            }
-            v.append("\t\tthis."+colNames[i]+"="+colNames[i]+";\r\n");
-        }
-        //无参数构造函数
-        sb.append("\tpublic "+under2camel(tableName,true)+"() {\r\n");
-        sb.append("\t\tsuper();\r\n");
-        sb.append("\t}\r\n");
-        //带参构造函数
-        sb.append("\tpublic "+under2camel(tableName,true)+"("+p.toString()+") {\r\n");
-        sb.append(v.toString());
-        sb.append("\t}\r\n");
-    }
-
-    /**
-     * @param sb
-     * @description 生成所有get/set方法
-     */
-    private void processAllMethod(StringBuffer sb) {
-        for (int i = 0; i < colNames.length; i++) {
-            sb.append("\tpublic void set" + initCap(colNames[i]) + "(" + sqlType2JavaType(colTypes[i]) + " "
-                    + colNames[i] + "){\r\n");
-            sb.append("\t\tthis." + colNames[i] + "=" + colNames[i] + ";\r\n");
-            sb.append("\t}\r\n");
-            sb.append("\tpublic " + sqlType2JavaType(colTypes[i]) + " get" + initCap(colNames[i]) + "(){\r\n");
-            sb.append("\t\treturn " + colNames[i] + ";\r\n");
-            sb.append("\t}\r\n");
-        }
-    }
-
-    /**
-     * @param sb
-     * @description 生成所有get/set方法
-     */
-    private void processDaoMethed(StringBuffer sb) {
-
-
-    }
-
-    /**
-     * @param sb
-     * @description 生成所有get/set方法
-     */
-    private void processServiceMethed(StringBuffer sb) {
-
-        sb.append("     int create("+modelName +" "+modelName2 +");\r\n\r\n");
-
-        sb.append("     int update(Long id,"+modelName +" "+modelName2 +");\n\n");
-
-        sb.append("     int delete(Long id);\n\n");
-
-        sb.append("     "+modelName+" getItem(Long id);\n\n");
-
-        sb.append("     /*page search list*/\n\n");
-
-        sb.append("     List<"+modelName+"> list(Integer pageSize, Integer pageNum);\n\n");
-    }
-
-    /**
-     * @param sb
-     * @description 生成所有get/set方法
-     */
-    private void processServiceImplMethed(StringBuffer sb) {
-
-        sb.append("@Autowired\r\n");
-        sb.append(modelName +"Mapper "+modelName2+"Mapper ;\r\n\r\n");
-
-        sb.append("@Autowired\r\n");
-        sb.append("public int create("+modelName+" "+modelName2+") {\r\n");
-        sb.append("     "+modelName2+".setCreateTime(new Date());\r\n");
-        sb.append("     return "+modelName2+"Mapper.insert("+modelName2+");\r\n");
-        sb.append("}\r\n");
-
-
     }
 
 
@@ -587,31 +613,67 @@ public class MySQLGeneratorEntityUtil {
         return null;
     }
 
+
     /**
-     * 生成EntityHelper
+     * @return
+     * @description 查找sql字段类型所对应的Java类型
      */
-    private void EntityHelper() {
-        String dirName = MySQLGeneratorEntityUtil.pkgModelDirName();
-        String javaPath = dirName + "/EntityHelper.java";
-        try {
-            StringBuffer sb = new StringBuffer();
-            sb.append("package " + packageModelOutPath + ";\r\n");
-            sb.append("\r\n");
-            sb.append("public abstract class EntityHelper{\r\n\r\n");
-            sb.append("\tpublic abstract String getPrimaryKey();\r\n");
-            sb.append("\r\n");
-            sb.append("}\r\n");
-            FileWriter fw = new FileWriter(javaPath);
-            PrintWriter pw = new PrintWriter(fw);
-            pw.println(sb.toString());
-            pw.flush();
-            if (pw != null){pw.close();}
-            System.out.println("create class 【EntityHelper】");
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+    private String sqlType2JdbcType(String sqlType) {
+
+        if (sqlType.equalsIgnoreCase("VARCHAR")) {
+            return "VARCHAR";
         }
+        if (sqlType.equalsIgnoreCase("longtext")) {
+            return "LONGVARCHAR";
+        }
+
+        if (sqlType.equalsIgnoreCase("Int")) {
+            return "INTEGER";
+        }
+
+        if (sqlType.equalsIgnoreCase("DateTime")) {
+            return "TIMESTAMP";
+        }
+
+        if (sqlType.equalsIgnoreCase("BIT")) {
+            return "BOOLEAN";
+        }
+
+        if (sqlType.equalsIgnoreCase("BIT")) {
+            return "BOOLEAN";
+        }
+
+        if (sqlType.equalsIgnoreCase("BIGINT")) {
+            return "BIGINT";
+        }
+
+
+        if (sqlType.equalsIgnoreCase("TINYINT")) {
+            return "TINYINT";
+        }
+
+
+        if (sqlType.equalsIgnoreCase("SMALLINT")) {
+            return "SMALLINT";
+        }
+
+        if (sqlType.equalsIgnoreCase("DOUBLE")) {
+            return "DOUBLE";
+        }
+
+        if (sqlType.equalsIgnoreCase("DECIMAL")) {
+            return "DECIMAL";
+        }
+
+        return null;
     }
+
+
+
+
+
+
+
     /**
      * @description 生成方法
      */
@@ -642,9 +704,7 @@ public class MySQLGeneratorEntityUtil {
         } else {
             for (String tableName : generateTables) tableNames.add(tableName);
         }
-        if(needEntityHelper) {
-            EntityHelper();
-        }
+
         String tableSql;
         PrintWriter pw = null;
         for (int j = 0; j < tableNames.size(); j++) {
@@ -694,8 +754,6 @@ public class MySQLGeneratorEntityUtil {
             pw.flush();
 
 
-
-
             ///controller
             String makeControllerContent = makeController();
             String dirControllerName = MySQLGeneratorEntityUtil.pkgControllerDirName();
@@ -713,8 +771,16 @@ public class MySQLGeneratorEntityUtil {
             pw.println(daoContent);
             pw.flush();
 
-            ///service
+            ///Mapper.xml
+            String xmlContent = makeXml();
+            String dirXmlName = MySQLGeneratorEntityUtil.pkgXmlDirName();
+            FileWriter fwXml = new FileWriter(dirXmlName + "/" + modelName + "Mapper.xml");
+            pw = new PrintWriter(fwXml);
+            pw.println(xmlContent);
+            pw.flush();
 
+
+            ///service
             String serviceContent = makeService();
             String dirServiceName = MySQLGeneratorEntityUtil.pkgServiceDirName();
             String javaServicePath = dirServiceName + "/" + modelName + "Service.java";
@@ -724,7 +790,6 @@ public class MySQLGeneratorEntityUtil {
             pw.flush();
 
             ///service
-
             String serviceImplContent = makeServiceImpl();
             String dirServiceImplName = MySQLGeneratorEntityUtil.pkgServiceImplDirName();
             String javaServiceImplPath = dirServiceImplName + "/" + modelName + "ServiceImpl.java";

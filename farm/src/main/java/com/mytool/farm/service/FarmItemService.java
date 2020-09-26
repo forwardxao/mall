@@ -1,21 +1,21 @@
 package com.mytool.farm.service;
 
-import com.mytool.model.FarmItem ; 
+import com.mytool.farm.model.FarmItem ; 
 import java.util.List;
 /**
  * table name:  farm_item
  * author name: mytool
- * create time: 2020-09-23 19:16:19
+ * create time: 2020-09-26 18:23:00
  */ 
 public interface FarmItemService{
 
      int create(FarmItem farmItem);
 
-     int update(Long id,FarmItem farmItem);
+     int update(FarmItem farmItem);
 
-     int delete(Long id);
+     int delete(Integer id);
 
-     FarmItem getItem(Long id);
+     FarmItem getItem(Integer id);
 
      /*page search list*/
 

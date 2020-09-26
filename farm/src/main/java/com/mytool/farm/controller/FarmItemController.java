@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * table name:  farm_item
  * author name: mytool
- * create time: 2020-09-23 19:16:19
+ * create time: 2020-09-26 18:23:00
  */
 @Controller
 @Api(value = "FarmItemController", description = "FarmItemController")
@@ -38,7 +38,7 @@ public class FarmItemController{
 
     @ApiOperation("update item info")
     @RequestMapping(value = "/update/{id}",method = RequestMethod.POST)
-    public CommonResult update(@PathVariable Long id,
+    public CommonResult update(@PathVariable Integer id,
                                @RequestBody FarmItem farmItem) {
         int count = service.update(id,farmItem);
         if (count > 0) {
@@ -50,7 +50,7 @@ public class FarmItemController{
 
     @ApiOperation("delete item by id")
     @RequestMapping(value = "/delete/{id}",method = RequestMethod.POST)
-    public CommonResult delete(@PathVariable Long id) {
+    public CommonResult delete(@PathVariable Integer id) {
         int count = service.delete(id);
         if (count > 0) {
              return CommonResult.success(count);
@@ -61,7 +61,7 @@ public class FarmItemController{
 
     @ApiOperation("get detail")
     @RequestMapping(value = "/{id}",method = RequestMethod.GET)
-    public CommonResult<FarmItem> getItem(@PathVariable Long id){
+    public CommonResult<FarmItem> getItem(@PathVariable Integer id){
          FarmItem farmItem=service.getItem(id);
          return CommonResult.success(farmItem);
     }
