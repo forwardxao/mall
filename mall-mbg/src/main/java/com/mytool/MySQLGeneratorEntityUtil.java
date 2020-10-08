@@ -1,7 +1,10 @@
 package com.mytool;
 
+import com.github.pagehelper.PageHelper;
 import com.mytool.common.api.CommonResult;
 import com.mytool.model.ClientMenu;
+import com.mytool.model.ClientMenuExample;
+import com.mytool.model.PmsProductCategoryExample;
 import com.mytool.model.UmsRole;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -156,6 +159,248 @@ public class MySQLGeneratorEntityUtil {
     /**
      * @description 生成class的所有内容
      */
+    private String makeExample() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("package " + packageModelOutPath + ";\r\n");
+        sb.append("\r\n");
+
+        sb.append("import java.util.ArrayList;\r\n");
+        sb.append("import java.util.List;\r\n");
+
+        // 判断是否导入工具包
+        if (needUtil) {
+            sb.append("import java.util.Date;\r\n");
+        }
+        if (needSql) {
+            sb.append("import java.sql.*;\r\n");
+        }
+
+        for (int i = 0; i < colNames.length; i++) {
+            String hasbd = sqlType2JavaType(colTypes[i]);
+            if(hasbd =="BigDecimal" || "BigDecimal".equals(hasbd)) {needBigDecimal=true;}
+        }
+        if(needBigDecimal) {
+            sb.append("import java.math.BigDecimal;\r\n");
+        }
+        // 注释部分
+        sb.append("/**\r\n");
+        sb.append(" * table name:  " + tableName + "\r\n");
+        sb.append(" * author name: " + authorName + "\r\n");
+        sb.append(" * create time: " + SDF.format(new Date()) + "\r\n");
+        sb.append(" */ \r\n");
+        // 实体部分
+        sb.append("public class " + modelName  + "Example {\r\n\r\n");
+
+        sb.append("\tprotected String orderByClause;\r\n\n");
+        sb.append("\tprotected boolean distinct;\r\n\n");
+
+        sb.append("\tprotected List<Criteria> oredCriteria;\r\n");
+        sb.append("\tpublic "+modelName+"Example() {\r\n");
+        sb.append("\t\toredCriteria = new ArrayList<"+modelName+"Example.Criteria>();\r\n");
+        sb.append("\t}\r\n");
+        sb.append("\tpublic void setOrderByClause(String orderByClause) {\r\n");
+        sb.append("\t\tthis.orderByClause = orderByClause;\r\n");
+        sb.append("\t}\r\n");
+        sb.append("\tpublic String getOrderByClause() {\r\n");
+        sb.append("\t\treturn orderByClause;\r\n");
+        sb.append("\t}\r\n");
+
+        sb.append("\tpublic void setDistinct(boolean distinct) {\r\n");
+        sb.append("\t\tthis.distinct = distinct;\r\n");
+        sb.append("\t}\r\n");
+        sb.append("\tpublic boolean isDistinct() {\r\n");
+        sb.append("\t\treturn distinct;\r\n");
+        sb.append("\t}\r\n");
+
+
+
+        sb.append("\tpublic List<Criteria> getOredCriteria() {\r\n");
+        sb.append("\t\treturn oredCriteria;\r\n");
+        sb.append("\t}\r\n");
+
+        sb.append("\tpublic void or(Criteria criteria) {\r\n");
+        sb.append("\t\toredCriteria.add(criteria);\r\n");
+        sb.append("\t}\r\n");
+
+
+        sb.append("\tpublic Criteria or() {\r\n");
+        sb.append("\t\tCriteria criteria = createCriteriaInternal();\r\n");
+        sb.append("\t\toredCriteria.add(criteria);\r\n");
+        sb.append("\t\treturn criteria;\r\n");
+        sb.append("\t}\r\n");
+
+        sb.append("\tpublic Criteria createCriteria() {\r\n");
+        sb.append("\t\tCriteria criteria = createCriteriaInternal();\r\n");
+        sb.append("\t\tif (oredCriteria.size() == 0) {\r\n");
+        sb.append("\t\t\toredCriteria.add(criteria);\r\n");
+        sb.append("\t\t}\r\n");
+        sb.append("\t\treturn criteria;\r\n");
+        sb.append("\t}\r\n");
+
+        sb.append("\tprotected Criteria createCriteriaInternal() {\r\n");
+        sb.append("\t\tCriteria criteria = new Criteria();\r\n");
+        sb.append("\t\treturn criteria;\r\n");
+        sb.append("\t}\r\n");
+
+        sb.append("\tpublic void clear() {\r\n");
+        sb.append("\t\toredCriteria.clear();\r\n");
+        sb.append("\t\torderByClause = null;\r\n");
+        sb.append("\t\tdistinct = false;\r\n");
+        sb.append("\t}\r\n");
+
+        sb.append("\tprotected abstract static class GeneratedCriteria {\r\n");
+        sb.append("\t\tprotected List<Criterion> criteria;\r\n");
+
+        sb.append("\t\tprotected GeneratedCriteria() {\r\n");
+        sb.append("\t\t\tsuper();\r\n");
+        sb.append("\t\t\tcriteria = new ArrayList<Criterion>();\r\n");
+        sb.append("\t\t}\r\n");
+
+        sb.append("\t\tpublic boolean isValid() {\r\n");
+        sb.append("\t\t\treturn criteria.size() > 0;\r\n");
+        sb.append("\t\t}\r\n");
+
+        sb.append("\t\tpublic List<Criterion> getAllCriteria() {\r\n");
+        sb.append("\t\t\treturn criteria;\r\n");
+        sb.append("\t\t}\r\n");
+
+        sb.append("\t\tpublic List<Criterion> getCriteria() {\r\n");
+        sb.append("\t\t\treturn criteria;\r\n");
+        sb.append("\t\t}\r\n");
+
+
+        sb.append("\t\tprotected void addCriterion(String condition) {\r\n");
+        sb.append("\t\t\tif (condition == null) {\r\n");
+        sb.append("\t\t\t\tthrow new RuntimeException(\"Value for condition cannot be null\");\r\n");
+        sb.append("\t\t\t}\r\n");
+        sb.append("\t\t\tcriteria.add(new Criterion(condition));\r\n");
+        sb.append("\t\t}\r\n");
+
+        sb.append("\t\tprotected void addCriterion(String condition, Object value, String property) {\r\n");
+        sb.append("\t\tif (value == null) {\r\n");
+        sb.append("\t\tthrow new RuntimeException(\"Value for \" + property + \" cannot be null\");\r\n");
+        sb.append("\t\t}\r\n");
+        sb.append("\t\t\tcriteria.add(new Criterion(condition, value));\r\n");
+        sb.append("\t\t}\r\n");
+
+        sb.append("\t\tprotected void addCriterion(String condition, Object value1, Object value2, String property) {\r\n");
+        sb.append("\t\t\tif (value1 == null || value2 == null) {\r\n");
+        sb.append("\t\t\t\tthrow new RuntimeException(\"Between values for \" + property + \" cannot be null\");\r\n");
+        sb.append("\t\t\t}\r\n");
+        sb.append("\t\t\tcriteria.add(new Criterion(condition, value1, value2));\r\n");
+        sb.append("\t\t}\r\n");
+
+
+        sb.append("\t}\r\n");
+
+
+
+        sb.append("\tpublic static class Criteria extends GeneratedCriteria {\r\n");
+        sb.append("\t\tprotected Criteria() {\r\n");
+        sb.append("\t\t\tsuper();\r\n");
+        sb.append("\t\t}\r\n");
+        sb.append("\t}\r\n");
+
+
+
+        sb.append("\tpublic static class Criterion {\n");
+        sb.append("\t\tprivate String condition;\n");
+
+        sb.append("\t\tprivate Object value;\n");
+
+        sb.append("\t\tprivate Object secondValue;\n");
+
+        sb.append("\t\tprivate boolean noValue;\n");
+
+        sb.append("\t\tprivate boolean singleValue;\n");
+
+        sb.append("\t\tprivate boolean betweenValue;\n");
+
+        sb.append("\t\tprivate boolean listValue;\n");
+
+        sb.append("\t\tprivate String typeHandler;\n");
+
+        sb.append("\t\tpublic String getCondition() {\n");
+        sb.append("\t\t\treturn condition;\n");
+        sb.append("\t\t}\n");
+
+        sb.append("\t\tpublic Object getValue() {\n");
+        sb.append("\t\t\treturn value;\n");
+        sb.append("\t\t}\n");
+
+        sb.append("\t\tpublic Object getSecondValue() {\n");
+        sb.append("\t\t\treturn secondValue;\n");
+        sb.append("\t\t}\n");
+
+        sb.append("\t\tpublic boolean isNoValue() {\n");
+        sb.append("\t\t\treturn noValue;\n");
+        sb.append("\t\t}\n");
+
+        sb.append("\t\tpublic boolean isSingleValue() {\n");
+        sb.append("\t\t\treturn singleValue;\n");
+        sb.append("\t\t}\n");
+
+        sb.append("\t\tpublic boolean isBetweenValue() {\n");
+        sb.append("\t\t\treturn betweenValue;\n");
+        sb.append("\t\t}\n");
+
+        sb.append("\t\tpublic boolean isListValue() {\n");
+        sb.append("\t\t\treturn listValue;\n");
+        sb.append("\t\t}\n");
+
+        sb.append("\t\tpublic String getTypeHandler() {\n");
+        sb.append("\t\t\treturn typeHandler;\n");
+        sb.append("\t\t}\n");
+
+        sb.append("\t\tprotected Criterion(String condition) {\n");
+        sb.append("\t\t\tsuper();\n");
+        sb.append("\t\t\tthis.condition = condition;\n");
+        sb.append("\t\t\tthis.typeHandler = null;\n");
+        sb.append("\t\t\tthis.noValue = true;\n");
+        sb.append("\t\t}\n");
+
+        sb.append("\t\tprotected Criterion(String condition, Object value, String typeHandler) {\n");
+        sb.append("\t\t\tsuper();\n");
+        sb.append("\t\t\tthis.condition = condition;\n");
+        sb.append("\t\t\tthis.value = value;\n");
+        sb.append("\t\t\tthis.typeHandler = typeHandler;\n");
+        sb.append("\t\t\tif (value instanceof List<?>) {\n");
+        sb.append("\t\t\t\tthis.listValue = true;\n");
+        sb.append("\t\t\t} else {\n");
+        sb.append("\t\t\t\tthis.singleValue = true;\n");
+        sb.append("\t\t\t}\n");
+        sb.append("\t\t }\n");
+
+        sb.append("\t\tprotected Criterion(String condition, Object value) {\n");
+        sb.append("\t\t\tthis(condition, value, null);\n");
+        sb.append("\t\t}\n");
+
+        sb.append("\t\tprotected Criterion(String condition, Object value, Object secondValue, String typeHandler) {\n");
+        sb.append("\t\t\tsuper();\n");
+        sb.append("\t\t\tthis.condition = condition;\n");
+        sb.append("\t\t\tthis.value = value;\n");
+        sb.append("\t\t\tthis.secondValue = secondValue;\n");
+        sb.append("\t\t\tthis.typeHandler = typeHandler;\n");
+        sb.append("\t\t\tthis.betweenValue = true;\n");
+        sb.append("\t\t}\n");
+
+        sb.append("\t\tprotected Criterion(String condition, Object value, Object secondValue) {\n");
+        sb.append("\t\t\tthis(condition, value, secondValue, null);\n");
+        sb.append("\t\t}\n");
+        sb.append("\t}\n");
+
+
+
+
+
+
+
+
+
+        sb.append("}\r\n");
+        return sb.toString();
+    }
+
     private String makeModel() {
         StringBuffer sb = new StringBuffer();
         sb.append("package " + packageModelOutPath + ";\r\n");
@@ -237,7 +482,7 @@ public class MySQLGeneratorEntityUtil {
         sb.append("package "+packageName+".controller;\r\n \n");
         sb.append("import com.mytool.common.api.CommonPage;  \r\n");
         sb.append("import com.mytool.common.api.CommonResult;  \r\n");
-        sb.append("import com.mytool.model."+modelName+" ; \r\n");
+        sb.append("import "+packageName+".model."+modelName+" ; \r\n");
         sb.append("import "+packageName+".service."+modelName+"Service;\r\n");
         sb.append("import io.swagger.annotations.Api;\r\n");
         sb.append("import io.swagger.annotations.ApiOperation;\r\n");
@@ -259,66 +504,66 @@ public class MySQLGeneratorEntityUtil {
         sb.append(" */\r\n");
         // 实体部分
         sb.append("@Controller\r\n");
-        sb.append("@Api(value = \""+modelName+"Controller\", description = \""+modelName+"Controller\")\r\n");
+        sb.append("@Api(value = \""+modelName+"Controller\", tags = {\""+modelName+"Controller\"})\r\n");
         sb.append("@RequestMapping(\"/"+modelName+"\")\r\n");
 
         sb.append("public class " + modelName + "Controller" + "{\r\n");
         sb.append("\r\n");
-        sb.append("    @Autowired\r\n");
-        sb.append("    "+modelName +"Service service;\r\n\r\n");
+        sb.append("\t\t@Autowired\r\n");
+        sb.append("\t\t"+modelName +"Service service;\r\n\r\n");
 
 
-        sb.append("    @ApiOperation(\"create one item\")\n");
-        sb.append("    @RequestMapping(value = \"/create\",method = RequestMethod.POST)\r\n");
-        sb.append("    public CommonResult create(@RequestBody "+modelName+" "+modelName2+") {\n");
-        sb.append("        int count = service.create("+modelName2+");\n");
-        sb.append("        if (count > 0) {\n");
-        sb.append("             return CommonResult.success(count);\n");
-        sb.append("        } else {\n");
-        sb.append("             return CommonResult.failed();\n");
-        sb.append("        }\n");
-        sb.append("    }\n\n");
+        sb.append("\t\t@ApiOperation(\"create one item\")\n");
+        sb.append("\t\t@RequestMapping(value = \"/create\",method = RequestMethod.POST)\r\n");
+        sb.append("\t\tpublic CommonResult create(@RequestBody "+modelName+" "+modelName2+") {\n");
+        sb.append("\t\t\t\tint count = service.create("+modelName2+");\n");
+        sb.append("\t\t\t\tif (count > 0) {\n");
+        sb.append("\t\t\t\t\t\treturn CommonResult.success(count);\n");
+        sb.append("\t\t\t\t} else {\n");
+        sb.append("\t\t\t\t\t\treturn CommonResult.failed();\n");
+        sb.append("\t\t\t\t}\n");
+        sb.append("\t\t}\n\n");
 
-        sb.append("    @ApiOperation(\"update item info\")\n");
-        sb.append("    @RequestMapping(value = \"/update/{"+primaryKey+"}\",method = RequestMethod.POST)\r\n");
-        sb.append("    public CommonResult update(@PathVariable Integer "+primaryKey+",\r\n");
-        sb.append("                               @RequestBody "+modelName+" "+modelName2+") {\n");
-        sb.append("        int count = service.update("+primaryKey+","+modelName2+");\n");
-        sb.append("        if (count > 0) {\n");
-        sb.append("             return CommonResult.success(count);\n");
-        sb.append("        } else {\n");
-        sb.append("             return CommonResult.failed();\n");
-        sb.append("        }\n");
-        sb.append("    }\n\n");
-
-
-        sb.append("    @ApiOperation(\"delete item by "+primaryKey+"\")\n");
-        sb.append("    @RequestMapping(value = \"/delete/{"+primaryKey+"}\",method = RequestMethod.POST)\r\n");
-        sb.append("    public CommonResult delete(@PathVariable Integer "+primaryKey+") {\r\n");
-        sb.append("        int count = service.delete("+primaryKey+");\n");
-        sb.append("        if (count > 0) {\n");
-        sb.append("             return CommonResult.success(count);\n");
-        sb.append("        } else {\n");
-        sb.append("             return CommonResult.failed();\n");
-        sb.append("        }\n");
-        sb.append("    }\n\n");
+        sb.append("\t\t@ApiOperation(\"update item info\")\n");
+        sb.append("\t\t@RequestMapping(value = \"/update/{"+primaryKey+"}\",method = RequestMethod.POST)\r\n");
+        sb.append("\t\tpublic CommonResult update(@PathVariable Integer "+primaryKey+",\r\n");
+        sb.append("\t\t\t\t\t\t\t\t@RequestBody "+modelName+" "+modelName2+") {\n");
+        sb.append("\t\t\t\tint count = service.update("+modelName2+");\n");
+        sb.append("\t\t\t\tif (count > 0) {\n");
+        sb.append("\t\t\t\t\t\treturn CommonResult.success(count);\n");
+        sb.append("\t\t\t\t} else {\n");
+        sb.append("\t\t\t\t\t\treturn CommonResult.failed();\n");
+        sb.append("\t\t\t\t}\n");
+        sb.append("\t\t}\n\n");
 
 
-        sb.append("    @ApiOperation(\"get detail\")\n");
-        sb.append("    @RequestMapping(value = \"/{"+primaryKey+"}\",method = RequestMethod.GET)\r\n");
-        sb.append("    public CommonResult<"+modelName+"> getItem(@PathVariable Integer "+primaryKey+"){\r\n");
-        sb.append("         "+modelName+" "+modelName2+"=service.getItem("+primaryKey+");\n");
-        sb.append("         return CommonResult.success("+modelName2+");\n");
-        sb.append("    }\n\n");
+        sb.append("\t\t@ApiOperation(\"delete item by "+primaryKey+"\")\n");
+        sb.append("\t\t@RequestMapping(value = \"/delete/{"+primaryKey+"}\",method = RequestMethod.POST)\r\n");
+        sb.append("\t\tpublic CommonResult delete(@PathVariable Integer "+primaryKey+") {\r\n");
+        sb.append("\t\t\t\tint count = service.delete("+primaryKey+");\n");
+        sb.append("\t\t\t\tif (count > 0) {\n");
+        sb.append("\t\t\t\t\t\treturn CommonResult.success(count);\n");
+        sb.append("\t\t\t\t} else {\n");
+        sb.append("\t\t\t\t\t\treturn CommonResult.failed();\n");
+        sb.append("\t\t\t\t}\n");
+        sb.append("\t\t}\n\n");
 
 
-        sb.append("    @ApiOperation(\"get list by page\")\n");
-        sb.append("    @RequestMapping(value = \"/list\",method = RequestMethod.GET)\r\n");
-        sb.append("    public CommonResult<CommonPage<"+modelName+">> list(@RequestParam(value = \"pageSize\", defaultValue = \"5\") Integer pageSize,\r\n");
-        sb.append("                                                    @RequestParam(value = \"pageNum\", defaultValue = \"1\") Integer pageNum) {\r\n");
-        sb.append("         List<"+modelName+"> itemList = service.list(pageSize, pageNum);\n");
-        sb.append("         return CommonResult.success(CommonPage.restPage(itemList));\n");
-        sb.append("    }\n\n");
+        sb.append("\t\t@ApiOperation(\"get detail\")\n");
+        sb.append("\t\t@RequestMapping(value = \"/{"+primaryKey+"}\",method = RequestMethod.GET)\r\n");
+        sb.append("\t\tpublic CommonResult<"+modelName+"> getItem(@PathVariable Integer "+primaryKey+"){\r\n");
+        sb.append("\t\t\t\t"+modelName+" "+modelName2+"=service.getItem("+primaryKey+");\n");
+        sb.append("\t\t\t\treturn CommonResult.success("+modelName2+");\n");
+        sb.append("\t\t}\n\n");
+
+
+        sb.append("\t\t@ApiOperation(\"get list by page\")\n");
+        sb.append("\t\t@RequestMapping(value = \"/list\",method = RequestMethod.GET)\r\n");
+        sb.append("\t\tpublic CommonResult<CommonPage<"+modelName+">> list(@RequestParam(value = \"pageSize\", defaultValue = \"5\") Integer pageSize,\r\n");
+        sb.append("\t\t\t\t\t\t\t\t\t\t\t\t\t\t@RequestParam(value = \"pageNum\", defaultValue = \"1\") Integer pageNum) {\r\n");
+        sb.append("\t\t\t\tList<"+modelName+"> itemList = service.list(pageSize, pageNum);\n");
+        sb.append("\t\t\t\treturn CommonResult.success(CommonPage.restPage(itemList));\n");
+        sb.append("\t\t}\n\n");
         sb.append("}\r\n");
         return sb.toString();
     }
@@ -330,6 +575,7 @@ public class MySQLGeneratorEntityUtil {
         StringBuffer sb = new StringBuffer();
         sb.append("package " + packageMapperOutPath + ";\r\n");
         sb.append("import com.mytool.farm.model."+modelName+" ; \r\n");
+        sb.append("import com.mytool.farm.model."+modelName+"Example ; \r\n");
         sb.append("import java.util.List;\r\n");
         sb.append("\r\n");
 
@@ -345,13 +591,13 @@ public class MySQLGeneratorEntityUtil {
 
         sb.append("\tint insert("+modelName +" model);\r\n\r\n");
 
-        sb.append("\tint update("+modelName +" model);\r\n\r\n");
+        sb.append("\tint update(Integer "+primaryKey+","+modelName +" model);\r\n\r\n");
 
         sb.append("\tint delete(Integer "+primaryKey+");\r\n\r\n");
 
         sb.append("\t"+modelName+" getItem(Integer "+primaryKey+");\r\n\r\n");
 
-        sb.append("\tList<"+modelName+"> list(Integer pageNum,Integer pageSize);\r\n\r\n");
+        sb.append("\tList<"+modelName+"> list("+modelName+"Example example);\r\n\r\n");
 
         sb.append("}\r\n");
         return sb.toString();
@@ -410,13 +656,19 @@ public class MySQLGeneratorEntityUtil {
         sb.append("\t\twhere "+primaryKey+" = #{"+primaryKey+",jdbcType=INTEGER}\n");
         sb.append("</select>\n");
 
-
         sb.append("<select id=\"list\" parameterType=\"java.lang.Integer\" resultMap=\"BaseResultMap\">\n");
         sb.append("\t\tselect *\n");
+        sb.append("\t\t<if test=\"distinct\"> distinct </if>\n");
         sb.append("\t\tfrom client_menu\n");
-        sb.append("\t\twhere "+primaryKey+" = #{"+primaryKey+",jdbcType=INTEGER}\n");
-        sb.append("</select>\n");
 
+        sb.append("\t\t<if test=\"_parameter != null\">\n");
+
+        sb.append("\t\t</if>\n");
+
+        sb.append("\t\twhere "+primaryKey+" = #{"+primaryKey+",jdbcType=INTEGER}\n");
+
+        sb.append("\t\t<if test=\"orderByClause != null\"> order by ${orderByClause}</if>\n");
+        sb.append("</select>\n");
 
         sb.append("</mapper>\r\n");
 
@@ -441,7 +693,7 @@ public class MySQLGeneratorEntityUtil {
 
         sb.append("     int create("+modelName +" "+modelName2 +");\r\n\r\n");
 
-        sb.append("     int update("+modelName +" "+modelName2 +");\n\n");
+        sb.append("     int update(Integer "+primaryKey+","+modelName +" "+modelName2 +");\n\n");
 
         sb.append("     int delete(Integer "+primaryKey+");\n\n");
 
@@ -449,9 +701,7 @@ public class MySQLGeneratorEntityUtil {
 
         sb.append("     /*page search list*/\n\n");
 
-        sb.append("     List<"+modelName+"> list(Integer pageSize, Integer pageNum);\n\n");
-
-
+        sb.append("     List<"+modelName+"> list(Integer "+primaryKey+",Integer pageSize, Integer pageNum);\n\n");
 
 
         sb.append("}\r\n");
@@ -466,16 +716,17 @@ public class MySQLGeneratorEntityUtil {
         sb.append("\r\n");
         // 判断是否导入工具包
         sb.append("import "+packageName+".model."+modelName+" ; \r\n");
+
+        sb.append("import "+packageName+".model."+modelName+"Example ; \r\n");
+
         sb.append("import org.springframework.beans.factory.annotation.Autowired;\r\n");
         sb.append("import "+packageName+".service."+modelName+"Service ; \r\n");
         sb.append("import "+packageName+".mapper."+modelName+"Mapper ; \r\n");
         sb.append("import org.springframework.stereotype.Service;\r\n");
+        sb.append("import com.github.pagehelper.PageHelper;\r\n");
         sb.append("import java.util.List;\r\n");
         sb.append("import java.util.Date;\r\n");
 
-
-
-        sb.append("import org.springframework.stereotype.Service;\r\n");
         // 注释部分
         sb.append("/**\r\n");
         sb.append(" * table name:  " + tableName + "\r\n");
@@ -495,7 +746,7 @@ public class MySQLGeneratorEntityUtil {
         sb.append("\t}\r\n\n");
 
         sb.append("\t@Autowired\r\n");
-        sb.append("\tpublic int update("+modelName+" "+modelName2+") {\r\n");
+        sb.append("\tpublic int update(Integer "+primaryKey+","+modelName+" "+modelName2+") {\r\n");
         sb.append("\t\t"+modelName2+".setUpdate_time((int)new Date().getTime()/1000);\r\n");
         sb.append("\t\treturn "+modelName2+"Mapper.update("+modelName2+");\r\n");
         sb.append("\t}\r\n\n");
@@ -512,8 +763,14 @@ public class MySQLGeneratorEntityUtil {
 
 
         sb.append("\t@Autowired\r\n");
-        sb.append("\tpublic List<"+modelName+"> list(Integer pageNum,Integer pageSize) {\r\n");
-        sb.append("\t\treturn "+modelName2+"Mapper.list(pageNum,pageSize);\r\n");
+        sb.append("\tpublic List<"+modelName+"> list(Integer "+primaryKey+",Integer pageNum,Integer pageSize) {\r\n");
+
+        sb.append("\t\tPageHelper.startPage(pageNum,pageSize);\r\n");
+
+        sb.append("\t\t"+modelName+"Example example = new "+modelName+"Example();\r\n");
+        sb.append("\t\texample.setOrderByClause(\""+primaryKey+" desc\");\r\n");
+
+        sb.append("\t\treturn "+modelName2+"Mapper.list(example);\r\n");
         sb.append("\t}\r\n\n");
 
 
@@ -741,8 +998,23 @@ public class MySQLGeneratorEntityUtil {
             while (rsComment.next()) {
                 colNamesComment.put(rsComment.getString("Field"), rsComment.getString("Comment"));
             }
-            
-            
+
+
+
+
+
+
+            //解析生成实体java文件的所有内容
+            String contentExample = makeExample();
+            FileWriter fwExample = new FileWriter(MySQLGeneratorEntityUtil.pkgModelDirName() + "/" + modelName + "Example.java");
+            pw = new PrintWriter(fwExample);
+            pw.println(contentExample);
+            pw.flush();
+
+
+
+
+
             //解析生成实体java文件的所有内容
             String content = makeModel();
             //输出生成文件

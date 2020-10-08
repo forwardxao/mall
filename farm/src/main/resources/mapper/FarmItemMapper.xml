@@ -29,5 +29,14 @@
 		from client_menu
 		where id = #{id,jdbcType=INTEGER}
 </select>
+<select id="list" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+		select *
+		<if test="distinct"> distinct </if>
+		from client_menu
+		<if test="_parameter != null">
+		</if>
+		where id = #{id,jdbcType=INTEGER}
+		<if test="orderByClause != null"> order by ${orderByClause}</if>
+</select>
 </mapper>
 

@@ -1,17 +1,18 @@
 package com.mytool.farm.service.impl;
 
 import com.mytool.farm.model.FarmItem ; 
+import com.mytool.farm.model.FarmItemExample ; 
 import org.springframework.beans.factory.annotation.Autowired;
 import com.mytool.farm.service.FarmItemService ; 
 import com.mytool.farm.mapper.FarmItemMapper ; 
 import org.springframework.stereotype.Service;
+import com.github.pagehelper.PageHelper;
 import java.util.List;
 import java.util.Date;
-import org.springframework.stereotype.Service;
 /**
  * table name:  farm_item
  * author name: mytool
- * create time: 2020-09-26 18:23:00
+ * create time: 2020-10-08 18:38:49
  */ 
 @Service
 public class FarmItemServiceImpl  implements FarmItemService{
@@ -26,7 +27,7 @@ public class FarmItemServiceImpl  implements FarmItemService{
 	}
 
 	@Autowired
-	public int update(FarmItem farmItem) {
+	public int update(Integer id,FarmItem farmItem) {
 		farmItem.setUpdate_time((int)new Date().getTime()/1000);
 		return farmItemMapper.update(farmItem);
 	}
@@ -42,8 +43,11 @@ public class FarmItemServiceImpl  implements FarmItemService{
 	}
 
 	@Autowired
-	public List<FarmItem> list(Integer pageNum,Integer pageSize) {
-		return farmItemMapper.list(pageNum,pageSize);
+	public List<FarmItem> list(Integer id,Integer pageNum,Integer pageSize) {
+		PageHelper.startPage(pageNum,pageSize);
+		FarmItemExample example = new FarmItemExample();
+		example.setOrderByClause("id desc");
+		return farmItemMapper.list(example);
 	}
 
 }

@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * table name:  farm_item
  * author name: mytool
- * create time: 2020-09-26 18:23:00
+ * create time: 2020-10-08 18:38:49
  */ 
 public class FarmItem implements Serializable {
 
